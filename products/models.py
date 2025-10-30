@@ -23,7 +23,6 @@ class Product(models.Model):
     price = models.BigIntegerField()
     category = models.ForeignKey(
         Category, related_name="products", on_delete=models.RESTRICT)
-    users = models.ManyToManyField(User, related_name="products")
 
 
     class Meta:
