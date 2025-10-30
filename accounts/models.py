@@ -1,6 +1,7 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
@@ -15,6 +16,10 @@ class Profile(models.Model):
     last_name = models.CharField(max_length=50, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     phone_number = PhoneNumberField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.user.username
+        if self.first_name or self.last_name:
+            return f"{self.first_name} {self.last_name}".strip()
+        return self.user.email
