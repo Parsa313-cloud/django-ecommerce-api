@@ -25,6 +25,7 @@ class Product(models.Model):
         Category, related_name="products", on_delete=models.RESTRICT)
 
 
+
     class Meta:
         db_table = "Product"
         ordering = ["price", "name"]
