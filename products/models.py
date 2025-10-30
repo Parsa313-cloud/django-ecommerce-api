@@ -1,5 +1,8 @@
 from django.db import models
 
+from accounts.models import User
+
+
 # Create your models here.
 
 
@@ -20,6 +23,8 @@ class Product(models.Model):
     price = models.BigIntegerField()
     category = models.ForeignKey(
         Category, related_name="products", on_delete=models.RESTRICT)
+    users = models.ManyToManyField(User, related_name="products")
+
 
     class Meta:
         db_table = "Product"
