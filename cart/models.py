@@ -4,6 +4,16 @@ from products.models import Product
 # Create your models here.
 
 
+# shoping cart model:
+
+class Shoping_cart(models.Model):
+    user = models.ForeignKey(
+        User, related_name="shoping_cart", on_delete=models.CASCADE)
+    # payments=models.ManyToOneRel(related_name="shoping_cart",on_delete=models.RESTRICT)
+
+# cart item model:
+
+
 def get_unkown_product():
     product = Product.objects.get_or_create(name="nonexistent product",
                                             description="This product is no longer available.",
