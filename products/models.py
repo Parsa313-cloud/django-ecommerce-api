@@ -22,9 +22,7 @@ class Product(models.Model):
     balance = models.IntegerField()
     price = models.BigIntegerField()
     category = models.ForeignKey(
-        Category, related_name="products", on_delete=models.RESTRICT)
-
-
+        Category, related_name="products", on_delete=models.RESTRICT, blank=True)
 
     class Meta:
         db_table = "Product"
