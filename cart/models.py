@@ -50,7 +50,7 @@ class CartItem(models.Model):
 
 
 class OrderItem(models.Model):
-    product = models.OneToOneField(
+    product = models.ForeignKey(
         Product,
         on_delete=models.SET(get_unknown_product),
         null=True,
