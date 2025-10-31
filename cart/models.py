@@ -32,3 +32,36 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.number}x {self.product.name}"
+
+
+
+class OrderItem(models.Model):
+    product = models.OneToOneField(
+        Product ,
+        on_delete= models.SET(get_unknown_product),
+        null=True,
+        blank=True,
+        related_name="order_items"
+    )
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    category = models.CharField(max_length=100 , blank=True)
+    number = models.PositiveIntegerField(default=1)
+    price = models.BigIntegerField()
+    time = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.number} × {self.name}"
+
+    def save(self , *args , **kwargs):
+        if self.product:
+            if not self.name:
+                self.name = self.product.name
+            if not self.description:
+                self.description = self.product.description
+            if not self.category and self.product.category:
+                self.category = str(self.product.category)
+            if not self.price:
+                self.price = self.product.price
+        super().save(*args, **kwargs)
+
+
