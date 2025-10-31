@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 
 
@@ -21,6 +23,7 @@ class Product(models.Model):
     description = models.TextField(blank=False)
     balance = models.IntegerField()
     price = models.BigIntegerField()
+    public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     category = models.ForeignKey(
         Category, related_name="products", on_delete=models.RESTRICT)
 
