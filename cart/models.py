@@ -4,27 +4,31 @@ from products.models import Product
 # Create your models here.
 
 
-# shoping cart model:
+# shopping cart model:
 
-class Shoping_cart(models.Model):
-    user = models.ForeignKey(
-        User, related_name="shoping_cart", on_delete=models.CASCADE)
-    # payments=models.ManyToOneRel(related_name="shoping_cart",on_delete=models.RESTRICT)
+class ShoppingCart(models.Model):
+    user = models.OneToOneField(
+        User, related_name="shopping_cart", on_delete=models.CASCADE)
+    # payments=models.ManyToOneRel(related_name="shopping_cart",on_delete=models.RESTRICT)
 
 # cart item model:
 
 
-def get_unkown_product():
+def get_unknown_product():
     product = Product.objects.get_or_create(name="nonexistent product",
                                             description="This product is no longer available.",
                                             balance=0, price=0, category=None)
     return product
 
 
-class Cart_Item(models.Model):
+class CartItem(models.Model):
     product = models.ForeignKey(
-        Product, related_name="cart_items", on_delete=models.SET(get_unkown_product()))
-    # shoping_cart=models.ForeignKey(,related_name="cart_items",on_delete=models.CASCADE)
-    number = models.IntegerField()
-    total = models.BigIntegerField()
-    date = models.DateTimeField()
+        Product, related_name="cart_item", on_delete=models.SET(get_unknown_product))
+    shopping_cart = models.ForeignKey(ShoppingCart,related_name="cart_items",on_delete=models.CASCADE)
+    number = models.PositiveIntegerField(default=1)
+    date = models.DateTimeField(auto_now_add=True)
+    def total(self):
+        return self.number * self.product.price
+
+    def __str__(self):
+        return f"{self.number}x {self.product.name}"
