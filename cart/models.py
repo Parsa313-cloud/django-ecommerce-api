@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from accounts.models import User
 from products.models import Product
@@ -34,6 +36,7 @@ class CartItem(models.Model):
     shopping_cart = models.ForeignKey(
         ShoppingCart, related_name="cart_items", on_delete=models.CASCADE)
     number = models.PositiveIntegerField(default=1)
+    public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -66,7 +69,7 @@ class OrderItem(models.Model):
 
     class Meta:
         db_table = "OrderItem"
-        ordering = ["date"]
+        ordering = ["time"]
         verbose_name = "OrderItem"
         verbose_name_plural = "OrderItems"
 
