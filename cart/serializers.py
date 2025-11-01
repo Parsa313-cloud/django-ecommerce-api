@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from cart.models import (ShoppingCart, CartItem)
+from cart.models import (ShoppingCart, CartItem, OrderItem)
 from products.models import Product
 
 
@@ -41,4 +41,20 @@ class CartItemSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'product', 'shopping_cart', 'number', 'total']
         extra_kwargs = {
             'url': {'view_name': 'cartitem-detail', 'lookup_field': 'public_id'}
+        }
+
+
+class OderItem(serializers.HyperlinkedModelSerializer):
+    product = serializers.HyperlinkedRelatedField(
+        view_name="product-detail",
+        lookup_field="public_id",
+        queryset=Product.objects.all(),
+    )
+
+    class Mata:
+        model = OrderItem
+        fields = ["url", 'product', 'name', 'description',
+                  'category', 'number', 'price', 'time']
+        extra_kwargs = {
+            'url': {'view_name': 'orderitem-detail', 'lookup_field': 'public_id'}
         }
