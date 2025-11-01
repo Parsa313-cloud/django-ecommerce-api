@@ -50,10 +50,15 @@ class OderItem(serializers.HyperlinkedModelSerializer):
         lookup_field="public_id",
         queryset=Product.objects.all(),
     )
+    user = serializers.HyperlinkedRelatedField(
+        view_name="user-detail",
+        lookup_field="email",
+        read_only=True,
+    )
 
     class Mata:
         model = OrderItem
-        fields = ["url", 'product', 'name', 'description',
+        fields = ["url", 'user', 'product', 'name', 'description',
                   'category', 'number', 'price', 'time']
         extra_kwargs = {
             'url': {'view_name': 'orderitem-detail', 'lookup_field': 'public_id'}
