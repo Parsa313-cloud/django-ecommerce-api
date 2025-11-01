@@ -4,11 +4,23 @@ from products.models import Product
 
 
 class ShoppingCartSerializer(serializers.HyperlinkedModelSerializer):
-    # cartItems=CartItemSerializer()
-    # payments=PaymentSerializer()
+    cartItems = serializers.HyperlinkedRelatedField(
+        view_name="cartItem-detail",
+        queryset=ShoppingCart.objects.all(),
+        lookup_field="public_id",
+    )
+    # payments=serializers.HyperlinkedRelatedField(
+    #     view_name="payment-detail",
+    #     queryset=payment.objects.all(),
+    #     lookup_field="public_id"
+    # )
+
     class Meta:
         model = ShoppingCart
-        fields = ["url", "id", "user", "cartItems", "payments"]
+        fields = ["url", "cartItems", "payments"]
+        extra_kwargs = {
+            'url': {'view_name': 'shoppingCart-detail', 'lookup-field': 'public_id'}
+        }
 
 
 class CartItemSerializer(serializers.HyperlinkedModelSerializer):
@@ -23,9 +35,10 @@ class CartItemSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='public_id',
     )
     total = serializers.ReadOnlyField(source='total')
+
     class Meta:
         model = CartItem
-        fields = ['url' , 'product' , 'shopping_cart' , 'number', 'total']
+        fields = ['url', 'product', 'shopping_cart', 'number', 'total']
         extra_kwargs = {
-            'url' : {'view_name' : 'cartitem-detail' , 'lookup_field' : 'public_id'}
+            'url': {'view_name': 'cartitem-detail', 'lookup_field': 'public_id'}
         }
