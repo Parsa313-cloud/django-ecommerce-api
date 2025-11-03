@@ -10,13 +10,13 @@ class ProfileInline(admin.TabularInline):
 
 
 @admin.register(User)
-class UserAmin(admin.ModelAdmin):
-    list_disply = ["email"]
+class UserAdmin(admin.ModelAdmin):
+    list_display = ["email"]
     inlines = [ProfileInline]
-
+    search_fields = ['username']
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ["user", "first_name", "last_name", "address",
-                    "phone_number", "slug", "created_at", "update_at"]
+                    "phone_number", "slug", "created_at", "updated_at"]
     search_fields = ["first_name", "last_name", "slug"]

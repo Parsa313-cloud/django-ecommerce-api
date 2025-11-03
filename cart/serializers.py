@@ -5,23 +5,18 @@ from products.models import Product
 
 class ShoppingCartSerializer(serializers.HyperlinkedModelSerializer):
     cartItems = serializers.HyperlinkedRelatedField(
-        view_name="cartItem-detail",
-        queryset=ShoppingCart.objects.all(),
+        view_name="cartitem-detail",
+        queryset=CartItem.objects.all(),
         lookup_field="public_id",
+        many=True
     )
-    # payments=serializers.HyperlinkedRelatedField(
-    #     view_name="payment-detail",
-    #     queryset=payment.objects.all(),
-    #     lookup_field="public_id"
-    # )
 
     class Meta:
         model = ShoppingCart
-        fields = ["url", "cartItems", "payments"]
+        fields = ["url", "cartItems"]
         extra_kwargs = {
-            'url': {'view_name': 'shoppingCart-detail', 'lookup-field': 'public_id'}
+            'url': {'view_name': 'shoppingcart-detail', 'lookup_field': 'public_id'}
         }
-
 
 class CartItemSerializer(serializers.HyperlinkedModelSerializer):
     product = serializers.HyperlinkedRelatedField(
@@ -44,19 +39,15 @@ class CartItemSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 
-class OderItem(serializers.HyperlinkedModelSerializer):
+class OrderItemSerializer(serializers.HyperlinkedModelSerializer):
     product = serializers.HyperlinkedRelatedField(
         view_name="product-detail",
         lookup_field="public_id",
         queryset=Product.objects.all(),
     )
-    user = serializers.HyperlinkedRelatedField(
-        view_name="user-detail",
-        lookup_field="email",
-        read_only=True,
-    )
+    user = serializers.ReadOnlyField(source='user.email')
 
-    class Mata:
+    class Meta:
         model = OrderItem
         fields = ["url", 'user', 'product', 'name', 'description',
                   'category', 'number', 'price', 'time']

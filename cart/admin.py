@@ -7,6 +7,7 @@ from products.models import Product
 class CartItemInline(admin.TabularInline):
     model = CartItem
     extra = 1
+    readonly_fields = ['total']
 
 
 @admin.register(ShoppingCart)
@@ -14,22 +15,16 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ["user"]
     inlines = [CartItemInline]
 
-
-class ProductInline(admin.TabularInline):
-    model = Product
-    extra = 0
-    can_delete = False
-
-
 @admin.register(CartItem)
 class CartItemAdmin(admin.ModelAdmin):
-    list_display = ['number', "public_id", "date", "shopping_cart"]
-    inlines = [ProductInline]
-    search_fields = ["public_id", "date"]
+    list_display = ['product', 'shopping_cart', 'number', 'total', 'date']
+    search_fields = ["public_id", 'product__name']
 
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ["name", "description",
-                    "category", "number", "price", "time"]
-    inlines = [Product]
+    list_display = ["name","product",
+                    "category","number", "price", "time"]
+    search_fields = ['name', 'product__name', 'user__email']
+    list_filter = ['category', 'time']
+

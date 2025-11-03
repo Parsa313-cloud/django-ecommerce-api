@@ -5,8 +5,8 @@ from .models import Product, Category
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("tage_name", "products")
-    list_filter = ("tage_name")
+    list_display = ("tag_name", "products")
+    list_filter = ("tag_name")
 
 
 @admin.register(Product)
