@@ -1,13 +1,13 @@
-from django.db import models
+import uuid
 
-from accounts.models import User
+from django.db import models
 
 
 # Create your models here.
 
 
 class Category(models.Model):
-    tag_name = models.CharField(blank=False, max_length=30)
+    tag_name = models.CharField(blank=False, max_length=30, unique=True)
 
     class Meta:
         db_table = "Category"
@@ -15,17 +15,25 @@ class Category(models.Model):
         verbose_name = "Category"
         verbose_name_plural = "Categories"
 
+    def __str__(self):
+        return self.tag_name
+
 
 class Product(models.Model):
     name = models.CharField(blank=False, max_length=30)
     description = models.TextField(blank=False)
     balance = models.IntegerField()
     price = models.BigIntegerField()
+    public_id = models.UUIDField(
+        default=uuid.uuid4, editable=False, unique=True)
     category = models.ForeignKey(
-        Category, related_name="products", on_delete=models.RESTRICT, blank=True)
+        Category, related_name="products", on_delete=models.RESTRICT)
 
     class Meta:
         db_table = "Product"
         ordering = ["price", "name"]
         verbose_name = "Product"
         verbose_name_plural = "Products"
+
+    def __str__(self):
+        return self.name
