@@ -36,7 +36,8 @@ class CartItem(models.Model):
     shopping_cart = models.ForeignKey(
         ShoppingCart, related_name="cart_items", on_delete=models.CASCADE)
     number = models.PositiveIntegerField(default=1)
-    public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    public_id = models.UUIDField(
+        default=uuid.uuid4, editable=False, unique=True)
     date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -53,6 +54,8 @@ class CartItem(models.Model):
 
 
 class OrderItem(models.Model):
+    user = models.ForeignKey(
+        User, related_name="orderItems", on_delete=models.CASCADE)
     product = models.ForeignKey(
         Product,
         on_delete=models.SET(get_unknown_product),
