@@ -1,17 +1,17 @@
 import uuid
-
+from decimal import Decimal
 from django.db import models
 from accounts.models import User
 from products.models import Product
-# Create your models here.
 
-
-# shopping cart model:
 
 class ShoppingCart(models.Model):
+    public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     user = models.OneToOneField(
-        User, related_name="shopping_cart", on_delete=models.CASCADE)
-    # payments=models.ManyToOneRel(related_name="shopping_cart",on_delete=models.RESTRICT)
+        User,
+        related_name="shopping_cart",
+        on_delete=models.CASCADE,
+    )
 
     class Meta:
         db_table = "ShoppingCart"
@@ -19,25 +19,37 @@ class ShoppingCart(models.Model):
         verbose_name = "ShoppingCart"
         verbose_name_plural = "ShoppingCarts"
 
-
-# cart item model:
+    def __str__(self):
+        return f"Cart of {self.user.email}"
 
 
 def get_unknown_product():
-    product = Product.objects.get_or_create(name="nonexistent product",
-                                            description="This product is no longer available.",
-                                            balance=0, price=0, category=None)
+    product, _ = Product.objects.get_or_create(
+        name="Nonexistent Product",
+        defaults={
+            "description": "This product is no longer available.",
+            "balance": 0,
+            "price": Decimal("0.00"),
+            "category": "Unknown",
+        },
+    )
     return product
 
 
 class CartItem(models.Model):
+    public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
     product = models.ForeignKey(
-        Product, related_name="cart_item", on_delete=models.SET(get_unknown_product))
+        Product,
+        related_name="cart_items",
+        on_delete=models.SET(get_unknown_product),
+    )
     shopping_cart = models.ForeignKey(
-        ShoppingCart, related_name="cart_items", on_delete=models.CASCADE)
+        ShoppingCart,
+        related_name="cart_items",
+        on_delete=models.CASCADE,
+    )
     number = models.PositiveIntegerField(default=1)
-    public_id = models.UUIDField(
-        default=uuid.uuid4, editable=False, unique=True)
     date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -46,33 +58,41 @@ class CartItem(models.Model):
         verbose_name = "CartItem"
         verbose_name_plural = "CartItems"
 
+    @property
     def total(self):
+
         return self.number * self.product.price
 
     def __str__(self):
-        return f"{self.number}x {self.product.name}"
+        return f"{self.number} × {self.product.name}"
 
 
 class OrderItem(models.Model):
+    public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
     user = models.ForeignKey(
-        User, related_name="orderItems", on_delete=models.CASCADE)
+        User,
+        related_name="order_items",
+        on_delete=models.CASCADE,
+    )
     product = models.ForeignKey(
         Product,
+        related_name="order_items",
         on_delete=models.SET(get_unknown_product),
         null=True,
         blank=True,
-        related_name="order_items"
     )
+
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=100, blank=True)
     number = models.PositiveIntegerField(default=1)
-    price = models.BigIntegerField()
+    price = models.DecimalField(max_digits=12, decimal_places=2)
     time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "OrderItem"
-        ordering = ["time"]
+        ordering = ["-time"]
         verbose_name = "OrderItem"
         verbose_name_plural = "OrderItems"
 
@@ -85,8 +105,8 @@ class OrderItem(models.Model):
                 self.name = self.product.name
             if not self.description:
                 self.description = self.product.description
-            if not self.category and self.product.category:
+            if not self.category and getattr(self.product, "category", None):
                 self.category = str(self.product.category)
-            if not self.price:
-                self.price = self.product.price
+                if self.price is None:
+                    self.price = self.product.price
         super().save(*args, **kwargs)
