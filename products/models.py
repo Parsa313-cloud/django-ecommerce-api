@@ -1,5 +1,6 @@
 import uuid
 
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -7,7 +8,7 @@ from django.db import models
 
 
 class Category(models.Model):
-    tag_name = models.CharField(blank=False, max_length=30, unique=True)
+    tag_name = models.CharField(blank=False, max_length=30, unique=True, db_index=True,)
 
     class Meta:
         db_table = "Category"
@@ -23,7 +24,10 @@ class Product(models.Model):
     name = models.CharField(blank=False, max_length=30)
     description = models.TextField(blank=False)
     balance = models.IntegerField()
-    price = models.BigIntegerField()
+    price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
     public_id = models.UUIDField(
         default=uuid.uuid4, editable=False, unique=True)
     category = models.ForeignKey(
@@ -36,4 +40,12 @@ class Product(models.Model):
         verbose_name_plural = "Products"
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.category.tag_name})"
+
+    def clean(self):
+        if self.balance < 0:
+            raise ValidationError("Balance cannot be negative")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
