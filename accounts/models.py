@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.text import slugify
 from phonenumber_field.modelfields import PhoneNumberField
+from django.db import transaction
 
 
 class User(AbstractUser):
@@ -20,15 +21,17 @@ class Profile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = slugify(self.user.username)
             slug = base_slug
             counter = 1
-            while Profile.objects.filter(slug=slug).exists():
-                slug = f"{base_slug}-{counter}"
-                counter += 1
-            self.slug = slug
+            with transaction.atomic():
+                while Profile.objects.filter(slug=slug).exists():
+                    slug = f"{base_slug}-{counter}"
+                    counter += 1
+                self.slug = slug
         super().save(*args, **kwargs)
 
     def __str__(self):

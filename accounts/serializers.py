@@ -9,9 +9,10 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True,
     )
 
+    user_name = serializers.ReadOnlyField(source="user.username")
     class Meta:
         model = Profile
-        fields = ['url', 'user', 'first_name', 'last_name', 'address',
+        fields = ['url',"user_name",'user', 'first_name', 'last_name', 'address',
                   'phone_number', 'slug', 'created_at', 'updated_at']
         extra_kwargs = {
             'url': {'view_name': 'profile-detail', 'lookup_field': 'slug'}
@@ -26,10 +27,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     )
     orderItems = serializers.HyperlinkedRelatedField(
         view_name="orderitem-detail",
-        lookup_filed='public_id',
+        lookup_field='public_id',
         read_only=True,
         many=True
     )
+
 
     class Meta:
         model = User
