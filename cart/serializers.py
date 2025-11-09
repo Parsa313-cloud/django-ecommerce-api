@@ -2,6 +2,7 @@ from rest_framework import serializers
 from cart.models import ShoppingCart, CartItem, OrderItem
 from products.models import Product
 
+
 class ShoppingCartSerializer(serializers.HyperlinkedModelSerializer):
 
     cartItems = serializers.HyperlinkedRelatedField(
@@ -15,8 +16,9 @@ class ShoppingCartSerializer(serializers.HyperlinkedModelSerializer):
         model = ShoppingCart
         fields = ['url', 'cartItems']
         extra_kwargs = {
-            'url': {'view_name': 'shoppingcart-detail', 'lookup_field': 'public_id'}
+            'url': {'view_name': 'shopping-detail', 'lookup_field': 'public_id'}
         }
+
 
 class CartItemSerializer(serializers.HyperlinkedModelSerializer):
     product = serializers.HyperlinkedRelatedField(
@@ -24,7 +26,6 @@ class CartItemSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='public_id',
         queryset=Product.objects.all(),
     )
-
 
     shopping_cart = serializers.HyperlinkedRelatedField(
         view_name='shoppingcart-detail',
@@ -48,6 +49,7 @@ class CartItemSerializer(serializers.HyperlinkedModelSerializer):
         validated_data['shopping_cart'] = shopping_cart
         return super().create(validated_data)
 
+
 class OrderItemSerializer(serializers.HyperlinkedModelSerializer):
 
     product = serializers.HyperlinkedRelatedField(
@@ -66,6 +68,7 @@ class OrderItemSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {
             'url': {'view_name': 'orderitem-detail', 'lookup_field': 'public_id'}
         }
+
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data)

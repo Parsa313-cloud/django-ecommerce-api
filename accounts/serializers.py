@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Profile, User
+from cart.models import ShoppingCart
 
 
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
@@ -32,10 +33,16 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True,
         many=True
     )
+    shopping_cart = serializers.HyperlinkedRelatedField(
+        view_name="shopping-detail",
+        lookup_field='public_id',
+        queryset=ShoppingCart.objects.all()
+    )
 
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'profile', 'orderItems']
+        fields = ['url', 'username', 'email',
+                  'profile', 'shopping_cart', 'orderItems']
         extra_kwargs = {
             'url': {'view_name': 'user-detail', 'lookup_field': 'username'}
         }
