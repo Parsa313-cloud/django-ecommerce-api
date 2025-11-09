@@ -5,14 +5,15 @@ from .models import Profile, User
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.HyperlinkedRelatedField(
         view_name='user-detail',
-        lookup_field='email',
+        lookup_field='username',
         read_only=True,
     )
 
     user_name = serializers.ReadOnlyField(source="user.username")
+
     class Meta:
         model = Profile
-        fields = ['url',"user_name",'user', 'first_name', 'last_name', 'address',
+        fields = ['url', "user_name", 'user', 'first_name', 'last_name', 'address',
                   'phone_number', 'slug', 'created_at', 'updated_at']
         extra_kwargs = {
             'url': {'view_name': 'profile-detail', 'lookup_field': 'slug'}
@@ -32,10 +33,19 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         many=True
     )
 
-
     class Meta:
         model = User
         fields = ['url', 'username', 'email', 'profile', 'orderItems']
         extra_kwargs = {
-            'url': {'view_name': 'user-detail', 'lookup_field': 'email'}
+            'url': {'view_name': 'user-detail', 'lookup_field': 'username'}
         }
+
+
+class UserSignUpSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'password']
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
