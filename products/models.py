@@ -8,7 +8,8 @@ from django.db import models
 
 
 class Category(models.Model):
-    tag_name = models.CharField(blank=False, max_length=30, unique=True, db_index=True,)
+    tag_name = models.CharField(
+        blank=False, max_length=30, unique=True, db_index=True,)
 
     class Meta:
         db_table = "Category"
@@ -23,7 +24,7 @@ class Category(models.Model):
 class Product(models.Model):
     name = models.CharField(blank=False, max_length=30)
     description = models.TextField(blank=False)
-    balance = models.IntegerField()
+    balance = models.IntegerField(default=1)
     price = models.DecimalField(
         max_digits=12,
         decimal_places=2,
