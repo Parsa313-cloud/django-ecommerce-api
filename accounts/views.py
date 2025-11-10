@@ -1,8 +1,10 @@
-from django.shortcuts import render
+from django.contrib.auth import authenticate
 from rest_framework.views import APIView, Response
 from rest_framework import permissions, status, viewsets
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.authtoken.models import Token
 from django.db import transaction
+from django.urls import reverse
 
 
 from .serializers import UserSignUpSerializer, ProfileSerializer, UserSerializer
@@ -16,7 +18,8 @@ from .models import User, Profile
 class SignUpView(APIView):
     permission_classes = [permissions.AllowAny]
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         serializer = UserSignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -24,8 +27,27 @@ class SignUpView(APIView):
             "username": user.username,
             "email": user.email,
             "message": "User created",
-            "login_url": "auth/login"
+            "login_url": reverse('login'),
         }, status=status.HTTP_201_CREATED)
+
+
+
+class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+
+    def post(self,request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({"token": token.key}, status=status.HTTP_200_OK)
+
+        return Response({"message": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 
 # profile view set :
@@ -71,14 +93,14 @@ class UserViewSet(viewsets.ModelViewSet):
         if user.is_staff:
             return User.objects.all()
 
-        return User.objects.filter(user=user)
+        return User.objects.filter(user=user.id)
 
     def get_object(self):
         obj = super().get_object()
         user = self.request.user
         if user.is_staff:
             return obj
-        if obj.user != user:
+        if obj != user:
             raise PermissionDenied(
                 "You don’t have permission to access this user.")
         return obj
