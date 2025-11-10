@@ -2,8 +2,8 @@ from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, permissions, filters
 
-from .models import CartItem, ShoppingCart
-from .serializers import CartItemSerializer, ShoppingCartSerializer
+from .models import CartItem, ShoppingCart, OrderItem
+from .serializers import CartItemSerializer, ShoppingCartSerializer, OrderItemSerializer
 from rest_framework.exceptions import PermissionDenied
 
 from rest_framework.exceptions import MethodNotAllowed
@@ -56,9 +56,32 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
         if user.is_staff:
             return obj
         if user != obj.user:
-            raise PermissionDenied("You dont access to this shoping cart ")
+            raise PermissionDenied("You dont access to this shopping cart ")
         return obj
 
     @transaction.atomic
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+
+class OrderItemViewSet(viewsets.ModelViewSet):
+    serializer_class = OrderItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'public_id'
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter,]
+    filterset_fields = ['time']
+    search_fields = ['product__name' , 'product__description']
+    ordering_fields = ['time']
+    ordering = ["-time"]
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return OrderItem.objects.select_related('product').all()
+
+        return OrderItem.objects.filter(user=user).select_related('product')
+    @transaction.atomic
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
