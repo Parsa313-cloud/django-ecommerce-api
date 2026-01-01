@@ -3,7 +3,7 @@ from .models import Product , Category
 
 class ProductSerializer(serializers.HyperlinkedModelSerializer):
     category = serializers.HyperlinkedRelatedField(
-        view_name='category-detail',
+        view_name='categories-detail',
         lookup_field='tag_name',
         read_only=True,
     )
@@ -12,12 +12,12 @@ class ProductSerializer(serializers.HyperlinkedModelSerializer):
         model = Product
         fields = ['url', 'name', 'description', 'balance', 'price', 'category', 'category_name']
         extra_kwargs = {
-            'url' : {'view_name' : 'product-detail', 'lookup_field' : 'public_id'}
+            'url' : {'view_name' : 'products-detail', 'lookup_field' : 'public_id'}
         }
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
     products = serializers.HyperlinkedRelatedField(
-        view_name='product-detail',
+        view_name='products-detail',
         lookup_field='public_id',
         many=True,
         read_only=True,
@@ -31,5 +31,5 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
         model = Category
         fields = ['url', 'tag_name', 'products', 'product_ids']
         extra_kwargs = {
-            'url' : {'view_name' : 'category-detail' , 'lookup_field' :'tag_name'}
+            'url' : {'view_name' : 'categories-detail' , 'lookup_field' :'tag_name'}
         }
