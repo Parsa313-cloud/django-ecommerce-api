@@ -22,5 +22,6 @@ import cart.urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("user/", include('accounts.urls')),
-    path("", include('cart.urls'))
+    path("", include('cart.urls')),
+    
 ]
