@@ -1,10 +1,12 @@
+from tokenize import TokenError
+
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions, status, viewsets
 from rest_framework.exceptions import PermissionDenied
 from django.db import transaction
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, Token
 from django.urls import reverse
 
 
@@ -119,3 +121,30 @@ class LoginView(APIView):
             "message": "User successfully logged in."
         }
         return Response(data, status=status.HTTP_200_OK)
+
+
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get('refresh')
+
+            if not refresh_token:
+                return Response(
+                    {"error": "Please provide refresh token."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(
+                {"message": "User successfully logged out."},
+                status=status.HTTP_205_RESET_CONTENT
+            )
+        except TokenError :
+            return Response(
+                {"error": "Invalid token or token has already been blacklisted."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
