@@ -6,5 +6,5 @@ router = DefaultRouter()
 router.register('products', ProductViewSet, basename='products')
 router.register('categories', CategoryViewSet , basename='categories')
 urlpatterns = [
-    path('api/shop/', include(router.urls)),
+    path('shop/', include(router.urls)),
 ]

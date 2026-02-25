@@ -1,8 +1,14 @@
-from django.shortcuts import render
-from rest_framework.views import APIView, Response
+from tokenize import TokenError
+
+from django.contrib.auth import authenticate
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework import permissions, status, viewsets
 from rest_framework.exceptions import PermissionDenied
 from django.db import transaction
+from rest_framework_simplejwt.tokens import RefreshToken, Token
+from django.urls import reverse
+
 
 
 from .serializers import UserSignUpSerializer, ProfileSerializer, UserSerializer
@@ -24,7 +30,7 @@ class SignUpView(APIView):
             "username": user.username,
             "email": user.email,
             "message": "User created",
-            "login_url": "auth/login"
+            "login_url": reverse("login"),
         }, status=status.HTTP_201_CREATED)
 
 
@@ -71,14 +77,74 @@ class UserViewSet(viewsets.ModelViewSet):
         if user.is_staff:
             return User.objects.all()
 
-        return User.objects.filter(user=user)
+        return User.objects.filter(id=user.id)
 
     def get_object(self):
         obj = super().get_object()
         user = self.request.user
         if user.is_staff:
             return obj
-        if obj.user != user:
-            raise PermissionDenied(
-                "You don’t have permission to access this user.")
+        if obj != user:
+            raise PermissionDenied("You don’t have permission to access this user.")
+
         return obj
+
+class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        if not username or not password:
+            return Response(
+                {"error": "Please provide username and password."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is None:
+            return Response(
+                {"error": "Incorrect username or password."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        if not user.is_active:
+            return Response({"error": "User account is disabled."}, status=status.HTTP_403_FORBIDDEN)
+
+        refresh = RefreshToken.for_user(user)
+        data = {
+            "username": user.username,
+            "email": user.email,
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "message": "User successfully logged in."
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get('refresh')
+
+            if not refresh_token:
+                return Response(
+                    {"error": "Please provide refresh token."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(
+                {"message": "User successfully logged out."},
+                status=status.HTTP_205_RESET_CONTENT
+            )
+        except TokenError :
+            return Response(
+                {"error": "Invalid token or token has already been blacklisted."},
+                status=status.HTTP_400_BAD_REQUEST
+            ) 
