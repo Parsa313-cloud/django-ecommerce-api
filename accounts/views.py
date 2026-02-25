@@ -147,4 +147,4 @@ class LogoutView(APIView):
             return Response(
                 {"error": "Invalid token or token has already been blacklisted."},
                 status=status.HTTP_400_BAD_REQUEST
-            )
+            ) 

@@ -11,7 +11,8 @@ class CartItemInline(admin.TabularInline):
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ["user"]
+    list_display = ["user" , "public_id"]
+    readonly_fields = ["public_id"]
     inlines = [CartItemInline]
 
 @admin.register(CartItem)

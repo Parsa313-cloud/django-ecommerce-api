@@ -17,7 +17,7 @@ class ProductSerializer(serializers.HyperlinkedModelSerializer):
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
     products = serializers.HyperlinkedRelatedField(
-        view_name='products-detail',
+        view_name='product-detail',
         lookup_field='public_id',
         many=True,
         read_only=True,
