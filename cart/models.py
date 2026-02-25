@@ -1,6 +1,8 @@
 import uuid
 from decimal import Decimal
 from django.db import models
+from django.db.models import Sum, F
+
 from accounts.models import User
 from products.models import Product
 
@@ -22,6 +24,14 @@ class ShoppingCart(models.Model):
     def __str__(self):
         return f"Cart of {self.user.email}"
 
+    @property
+    def total_price(self):
+        result = self.cart_items.aggregate(
+            total=Sum(F('number') * F('product__price'), output_field=models.DecimalField())
+        )
+        return result["total"] or 0
+
+
 
 def get_unknown_product():
     product, _ = Product.objects.get_or_create(
@@ -34,6 +44,7 @@ def get_unknown_product():
         },
     )
     return product
+
 
 
 class CartItem(models.Model):

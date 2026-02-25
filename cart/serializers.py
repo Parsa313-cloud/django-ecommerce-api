@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from cart.models import ShoppingCart, CartItem, OrderItem
 from products.models import Product
+from .models import ShoppingCart, CartItem  , OrderItem
 
 
 class ShoppingCartSerializer(serializers.HyperlinkedModelSerializer):
@@ -10,10 +10,10 @@ class ShoppingCartSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True,
         many=True
     )
-
+    total_price = serializers.ReadOnlyField()
     class Meta:
         model = ShoppingCart
-        fields = ['url', 'cartItems']
+        fields = ['url', 'cartItems' , 'total_price']
         extra_kwargs = {
             'url': {'view_name': 'shoppingcart-detail', 'lookup_field': 'public_id'}
         }
@@ -43,10 +43,13 @@ class CartItemSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         request = self.context['request']
         user = request.user
-        from .models import ShoppingCart, CartItem
         shopping_cart, _ = ShoppingCart.objects.get_or_create(user=user)
         product = validated_data['product']
         request_number = validated_data.get('number', 1)
+        if request_number <= 0:
+            raise serializers.ValidationError({
+                "number": "Number of items must be at least 1."
+            })
         existing_item = CartItem.objects.filter(shopping_cart=shopping_cart, product=product).first()
 
         if existing_item:
@@ -71,9 +74,8 @@ class CartItemSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class OrderItemSerializer(serializers.HyperlinkedModelSerializer):
-    product = serializers.HyperlinkedRelatedField(
-        view_name='product-detail',
-        lookup_field='public_id',
+    product = serializers.SlugRelatedField(
+        slug_field='public_id',
         read_only=True
     )
     user = serializers.ReadOnlyField(source='user.email')
