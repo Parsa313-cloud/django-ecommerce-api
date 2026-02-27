@@ -8,6 +8,7 @@ class ShoppingCartSerializer(serializers.HyperlinkedModelSerializer):
         view_name='cartitem-detail',
         lookup_field='public_id',
         read_only=True,
+        source='cart_items',
         many=True
     )
     total_price = serializers.ReadOnlyField()

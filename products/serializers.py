@@ -10,14 +10,14 @@ class ProductSerializer(serializers.HyperlinkedModelSerializer):
     category_name = serializers.ReadOnlyField(source="category.tag_name")
     class Meta:
         model = Product
-        fields = ['url', 'name', 'description', 'balance', 'price', 'category', 'category_name']
+        fields = ['url', 'name', 'description', 'balance', 'price', 'category', 'category_name' , 'public_id']
         extra_kwargs = {
             'url' : {'view_name' : 'products-detail', 'lookup_field' : 'public_id'}
         }
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
     products = serializers.HyperlinkedRelatedField(
-        view_name='product-detail',
+        view_name='products-detail',
         lookup_field='public_id',
         many=True,
         read_only=True,
