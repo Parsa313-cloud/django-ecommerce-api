@@ -59,7 +59,7 @@ This project is a comprehensive REST API backend for an E-commerce application. 
 Here is the database schema detailing the relationships between Users, Profiles, Products, Carts, and Orders:
 
 <div align="center">
-  <img src="./images/erd.png" alt="E-commerce Database ERD" width="800">
+  <img src="./images/database-schema.png" alt="E-commerce Database ERD" width="800">
 </div>
 
 
