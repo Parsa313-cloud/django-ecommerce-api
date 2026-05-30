@@ -161,8 +161,3 @@ This API is fully documented using Swagger. Once your local server is running, y
 ## 📜 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-<div align="center">
-  <i>Developed with ❤️ by [Your Name]</i>
-</div>
